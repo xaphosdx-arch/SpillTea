@@ -38,12 +38,11 @@ export function QuestionCard({ question, onAnswer, questionNumber, totalQuestion
     })
   }, [question.id])
 
-  const handleOptionClick = (option: string, index: number) => {
+  const handleOptionClick = (option: string) => {
     if (selectedOption) return
     setSelectedOption(option)
     setShowPercentages(true)
     
-    // Wait a bit then trigger next question
     setTimeout(() => {
       onAnswer(option)
     }, 1500)
@@ -56,7 +55,6 @@ export function QuestionCard({ question, onAnswer, questionNumber, totalQuestion
       exit={{ opacity: 0, y: -50 }}
       className="w-full max-w-md mx-auto"
     >
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-bold tracking-wide">
@@ -69,7 +67,6 @@ export function QuestionCard({ question, onAnswer, questionNumber, totalQuestion
         </span>
       </div>
 
-      {/* Question */}
       <div className="bg-card border border-border rounded-2xl p-6 mb-6 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-accent to-primary" />
         
@@ -79,7 +76,6 @@ export function QuestionCard({ question, onAnswer, questionNumber, totalQuestion
           {question.text}
         </h2>
 
-        {/* Fake engagement stats */}
         <div className="flex items-center gap-4 mt-6 text-muted-foreground text-sm">
           <div className="flex items-center gap-1">
             <MessageCircle className="w-4 h-4" />
@@ -92,12 +88,11 @@ export function QuestionCard({ question, onAnswer, questionNumber, totalQuestion
         </div>
       </div>
 
-      {/* Options */}
       <div className="space-y-3">
         {question.options?.map((option, index) => (
           <motion.button
             key={option}
-            onClick={() => handleOptionClick(option, index)}
+            onClick={() => handleOptionClick(option)}
             disabled={selectedOption !== null}
             whileTap={{ scale: selectedOption ? 1 : 0.98 }}
             className={`
@@ -110,7 +105,6 @@ export function QuestionCard({ question, onAnswer, questionNumber, totalQuestion
               }
             `}
           >
-            {/* Progress bar for percentages */}
             <AnimatePresence>
               {showPercentages && (
                 <motion.div
@@ -147,7 +141,6 @@ export function QuestionCard({ question, onAnswer, questionNumber, totalQuestion
         ))}
       </div>
 
-      {/* Trending indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
