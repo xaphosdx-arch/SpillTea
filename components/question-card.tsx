@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Flame, Share2, MessageCircle, ChevronRight } from "lucide-react"
 import type { Question } from "@/lib/questions"
@@ -15,15 +15,28 @@ interface QuestionCardProps {
 export function QuestionCard({ question, onAnswer, questionNumber, totalQuestions }: QuestionCardProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
   const [showPercentages, setShowPercentages] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [fakeStats, setFakeStats] = useState({ comments: 0, shares: 0, answering: 0 })
 
-  // Generate fake percentages
-  const fakePercentages = question.options?.map(() => 
-    Math.floor(Math.random() * 40) + 20
-  ) || []
-  
-  // Normalize to 100%
-  const total = fakePercentages.reduce((a, b) => a + b, 0)
-  const normalizedPercentages = fakePercentages.map(p => Math.round((p / total) * 100))
+  // Generate stable fake percentages based on question id (deterministic)
+  const normalizedPercentages = useMemo(() => {
+    const seed = question.id.charCodeAt(0) + question.id.length
+    const fakePercentages = question.options?.map((_, i) => 
+      ((seed * (i + 1) * 7) % 40) + 20
+    ) || []
+    const total = fakePercentages.reduce((a, b) => a + b, 0)
+    return fakePercentages.map(p => Math.round((p / total) * 100))
+  }, [question.id, question.options])
+
+  // Generate random stats only on client
+  useEffect(() => {
+    setMounted(true)
+    setFakeStats({
+      comments: Math.floor(Math.random() * 50) + 10,
+      shares: Math.floor(Math.random() * 20) + 5,
+      answering: Math.floor(Math.random() * 5000) + 1000,
+    })
+  }, [question.id])
 
   const handleOptionClick = (option: string, index: number) => {
     if (selectedOption) return
@@ -70,11 +83,11 @@ export function QuestionCard({ question, onAnswer, questionNumber, totalQuestion
         <div className="flex items-center gap-4 mt-6 text-muted-foreground text-sm">
           <div className="flex items-center gap-1">
             <MessageCircle className="w-4 h-4" />
-            <span>{Math.floor(Math.random() * 50) + 10}K</span>
+            <span>{mounted ? `${fakeStats.comments}K` : "--K"}</span>
           </div>
           <div className="flex items-center gap-1">
             <Share2 className="w-4 h-4" />
-            <span>{Math.floor(Math.random() * 20) + 5}K</span>
+            <span>{mounted ? `${fakeStats.shares}K` : "--K"}</span>
           </div>
         </div>
       </div>
@@ -142,7 +155,7 @@ export function QuestionCard({ question, onAnswer, questionNumber, totalQuestion
         className="mt-6 text-center"
       >
         <span className="text-muted-foreground text-sm">
-          🔥 <span className="text-primary font-semibold">{Math.floor(Math.random() * 5000) + 1000}</span> people answering right now
+          <span className="text-primary font-semibold">{mounted ? fakeStats.answering.toLocaleString() : "---"}</span> people answering right now
         </span>
       </motion.div>
     </motion.div>

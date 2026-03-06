@@ -15,11 +15,25 @@ export function AnswersSection({ question, userAnswer }: AnswersSectionProps) {
   const [answers, setAnswers] = useState<FakeAnswer[]>([])
   const [likedAnswers, setLikedAnswers] = useState<Set<string>>(new Set())
   const [showUserAnswer, setShowUserAnswer] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [fakeStats, setFakeStats] = useState({
+    responses: 0,
+    agreeCount: 0,
+    moreAnswers: 0,
+    commentCounts: [] as number[],
+  })
 
   useEffect(() => {
     // Generate fake answers with a slight delay for effect
     const fakeAnswers = generateFakeAnswers(question)
     setAnswers(fakeAnswers)
+    setMounted(true)
+    setFakeStats({
+      responses: Math.floor(Math.random() * 100) + 50,
+      agreeCount: Math.floor(Math.random() * 500) + 50,
+      moreAnswers: Math.floor(Math.random() * 500) + 100,
+      commentCounts: fakeAnswers.map(() => Math.floor(Math.random() * 200) + 10),
+    })
     
     setTimeout(() => {
       setShowUserAnswer(true)
@@ -54,7 +68,7 @@ export function AnswersSection({ question, userAnswer }: AnswersSectionProps) {
           <span className="font-bold text-foreground">Top Answers</span>
         </div>
         <span className="text-muted-foreground text-sm">
-          {Math.floor(Math.random() * 100) + 50}K responses
+          {mounted ? `${fakeStats.responses}K responses` : "-- responses"}
         </span>
       </div>
 
@@ -81,7 +95,7 @@ export function AnswersSection({ question, userAnswer }: AnswersSectionProps) {
           {/* Fake engagement on user answer */}
           <div className="flex items-center gap-4 mt-4 text-muted-foreground text-sm">
             <span className="text-primary">
-              ❤️ {Math.floor(Math.random() * 500) + 50} people agree
+              {mounted ? `${fakeStats.agreeCount} people agree` : "-- people agree"}
             </span>
           </div>
         </motion.div>
@@ -138,7 +152,7 @@ export function AnswersSection({ question, userAnswer }: AnswersSectionProps) {
               
               <button className="flex items-center gap-1 hover:text-primary transition-colors">
                 <MessageCircle className="w-5 h-5" />
-                <span className="text-sm">{Math.floor(Math.random() * 200) + 10}</span>
+                <span className="text-sm">{mounted && fakeStats.commentCounts[index] ? fakeStats.commentCounts[index] : "--"}</span>
               </button>
               
               <button className="flex items-center gap-1 hover:text-primary transition-colors">
@@ -157,7 +171,7 @@ export function AnswersSection({ question, userAnswer }: AnswersSectionProps) {
         className="mt-6 text-center"
       >
         <button className="text-primary font-semibold text-sm hover:underline">
-          View {Math.floor(Math.random() * 500) + 100} more answers →
+          View {mounted ? fakeStats.moreAnswers : "---"} more answers
         </button>
       </motion.div>
     </div>
