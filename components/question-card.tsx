@@ -12,10 +12,20 @@ interface QuestionCardProps {
   totalQuestions: number
 }
 
+const FIRST_NAMES = [
+  "Emma", "Liam", "Olivia", "Noah", "Ava", "Ethan", "Sophia", "Mason",
+  "Isabella", "James", "Mia", "Logan", "Charlotte", "Lucas", "Amelia",
+  "Alex", "Harper", "Jack", "Evelyn", "Aiden", "Luna", "Caden", "Ella",
+  "Jayden", "Chloe", "Ryan", "Zoey", "Tyler", "Lily", "Brandon", "Riley"
+]
+
+const LAST_INITIALS = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "P", "R", "S", "T", "W"]
+
 export function QuestionCard({ question, onAnswer, questionNumber, totalQuestions }: QuestionCardProps) {
   const [exitX, setExitX] = useState(0)
   const [mounted, setMounted] = useState(false)
   const [answeringCount, setAnsweringCount] = useState(0)
+  const [recentAnswer, setRecentAnswer] = useState({ name: "", answer: "" })
 
   const x = useMotionValue(0)
   const rotate = useTransform(x, [-200, 200], [-25, 25])
@@ -26,9 +36,24 @@ export function QuestionCard({ question, onAnswer, questionNumber, totalQuestion
   // No indicator opacity (swipe right)
   const noOpacity = useTransform(x, [0, 100, 200], [0, 0.5, 1])
 
+  const generateRandomAnswer = () => {
+    const firstName = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)]
+    const lastInitial = LAST_INITIALS[Math.floor(Math.random() * LAST_INITIALS.length)]
+    const answer = Math.random() > 0.5 ? "YES" : "NO"
+    return { name: `${firstName} ${lastInitial}.`, answer }
+  }
+
   useEffect(() => {
     setMounted(true)
     setAnsweringCount(Math.floor(Math.random() * 5000) + 1000)
+    setRecentAnswer(generateRandomAnswer())
+    
+    // Update the fake answer periodically
+    const interval = setInterval(() => {
+      setRecentAnswer(generateRandomAnswer())
+    }, 2500)
+    
+    return () => clearInterval(interval)
   }, [question.id])
 
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -119,18 +144,27 @@ export function QuestionCard({ question, onAnswer, questionNumber, totalQuestion
         </div>
       </motion.div>
 
-      {/* People answering indicator */}
+      {/* Recent answer indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
         className="mt-6 text-center"
       >
-        <span className="text-muted-foreground text-sm">
-          <span className="text-primary font-semibold">
-            {mounted ? answeringCount.toLocaleString() : "---"}
-          </span> people answering right now
-        </span>
+        {mounted && recentAnswer.name && (
+          <motion.div
+            key={recentAnswer.name + recentAnswer.answer}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-muted-foreground text-sm"
+          >
+            <span className="font-semibold text-foreground">{recentAnswer.name}</span>
+            {" just answered "}
+            <span className={recentAnswer.answer === "YES" ? "text-green-500 font-bold" : "text-red-500 font-bold"}>
+              {recentAnswer.answer}
+            </span>
+          </motion.div>
+        )}
       </motion.div>
     </div>
   )
