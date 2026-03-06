@@ -25,7 +25,7 @@ export function AnswersSection({ question, userAnswer }: AnswersSectionProps) {
 
   useEffect(() => {
     // Generate fake answers with a slight delay for effect
-    const fakeAnswers = generateFakeAnswers(question)
+    const fakeAnswers = generateFakeAnswers(question, userAnswer)
     setAnswers(fakeAnswers)
     setMounted(true)
     setFakeStats({
@@ -38,7 +38,7 @@ export function AnswersSection({ question, userAnswer }: AnswersSectionProps) {
     setTimeout(() => {
       setShowUserAnswer(true)
     }, 500)
-  }, [question])
+  }, [question, userAnswer])
 
   const toggleLike = (answerId: string) => {
     setLikedAnswers(prev => {
