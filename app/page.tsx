@@ -20,6 +20,7 @@ export default function Home() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answeredQuestions, setAnsweredQuestions] = useState<AnsweredQuestion[]>([])
   const [viewingAnswerIndex, setViewingAnswerIndex] = useState(0)
+  const [completionStats, setCompletionStats] = useState<{ matchRate: number; rank: number } | null>(null)
 
   const currentQuestion = questions[currentQuestionIndex]
 
@@ -46,7 +47,23 @@ export default function Home() {
     setAnsweredQuestions([])
     setViewingAnswerIndex(0)
     setGameState("playing")
+    setCompletionStats(null)
   }, [])
+
+  // Generate completion stats only on client when game completes
+  const generateCompletionStats = useCallback(() => {
+    if (gameState === "complete" && !completionStats) {
+      setCompletionStats({
+        matchRate: Math.floor(Math.random() * 80) + 20,
+        rank: Math.floor(Math.random() * 1000) + 1,
+      })
+    }
+  }, [gameState, completionStats])
+
+  // Trigger stats generation when complete
+  if (gameState === "complete" && !completionStats) {
+    generateCompletionStats()
+  }
 
   return (
     <main className="min-h-screen bg-background">
@@ -130,19 +147,19 @@ export default function Home() {
               <div className="grid grid-cols-3 gap-4 mb-8">
                 <div className="bg-card border border-border rounded-xl p-4">
                   <div className="text-2xl font-bold text-primary">
-                    {Math.floor(Math.random() * 80) + 20}%
+                    {completionStats ? `${completionStats.matchRate}%` : "--%"}
                   </div>
                   <div className="text-xs text-muted-foreground">Match Rate</div>
                 </div>
                 <div className="bg-card border border-border rounded-xl p-4">
                   <div className="text-2xl font-bold text-accent">
-                    #{Math.floor(Math.random() * 1000) + 1}
+                    {completionStats ? `#${completionStats.rank}` : "#--"}
                   </div>
                   <div className="text-xs text-muted-foreground">Your Rank</div>
                 </div>
                 <div className="bg-card border border-border rounded-xl p-4">
                   <div className="text-2xl font-bold text-foreground">
-                    🔥{answeredQuestions.length}
+                    {answeredQuestions.length}
                   </div>
                   <div className="text-xs text-muted-foreground">Streak</div>
                 </div>

@@ -1,9 +1,16 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Flame, Users } from "lucide-react"
 
 export function Header() {
+  const [liveCount, setLiveCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    setLiveCount(Math.floor(Math.random() * 5000) + 10000)
+  }, [])
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
@@ -33,7 +40,7 @@ export function Header() {
           </span>
           <Users className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm text-muted-foreground font-medium">
-            {Math.floor(Math.random() * 5000) + 10000} live
+            {liveCount !== null ? `${liveCount.toLocaleString()} live` : "-- live"}
           </span>
         </motion.div>
       </div>
